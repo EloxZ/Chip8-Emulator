@@ -393,8 +393,9 @@ void Chip8::op_8XYE(uint16_t instruction) {
     //std::cout << "op_8X0E" << '\n';
     uint8_t X = (instruction >> 8) & 0x0F;
     uint8_t Y = (instruction >> 4) & 0x0F;
+    uint8_t t = V[Y] >> 7;
     V[X] = V[Y] << 1;
-    V[0xF] = V[Y] >> 7;
+    V[0xF] = t;
 }
 
 void Chip8::op_9XY0(uint16_t instruction) {
@@ -575,13 +576,8 @@ void Chip8::op_8XY5(uint16_t instruction) {
     //std::cout << "op_8XY5" << '\n';
     uint8_t x = (instruction >> 8) & 0x0F; // extract X
     uint8_t y = (instruction >> 4) & 0x0F; // extract Y
+    uint8_t t = (V[x] >= V[y])? 1 : 0;
     V[x] -= V[y];
-
-    if (V[x] >= V[y]) {
-        V[0xF] = 1;
-    } else {
-        V[0xF] = 0;
-    }
-    
+    V[0xF] = t;
 }
 
