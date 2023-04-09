@@ -51,8 +51,6 @@ class Chip8
         uint8_t soundTimer;
 
     private:
-        bool keypadWait;
-
         uint8_t memory[MEMORY_SIZE] = {0};
         uint8_t V[REGISTERS_SIZE]  = {0};
         uint16_t I;

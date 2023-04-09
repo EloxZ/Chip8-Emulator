@@ -40,7 +40,7 @@ int main()
     sound.setBuffer(buffer);
     sound.setVolume(50);
 
-    chip.loadROM("SpaceInvaders.ch8");
+    chip.loadROM("flags.ch8");
     std::thread cpuThread([&chip]() {
         chip.startCycle(1.43);
     });

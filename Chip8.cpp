@@ -8,7 +8,6 @@ Chip8::Chip8()
     halt = false;
     srand(time(nullptr));
     drawFlag = false;
-    keypadWait = false;
     delayTimer = 0;
     soundTimer = 0;
 
@@ -54,7 +53,8 @@ void Chip8::loadROM(std::string romName)
 void Chip8::DecrementDelay(auto delayStart, auto delayDuration) {
     while (!halt) {
         auto now = std::chrono::steady_clock::now();
-        if ((now - delayStart).count() >= delayDuration.count()) {
+        if ((now - delayStart).count() / 1000000.0 >= delayDuration.count()) {
+            //std::cout << (std::chrono::steady_clock::now() - delayStart).count() / 1000000.0 << " ms" << std::endl;
             delayStart = now;
             if (delayTimer > 0) delayTimer--;
         }
@@ -63,7 +63,8 @@ void Chip8::DecrementDelay(auto delayStart, auto delayDuration) {
 
 void Chip8::startCycle(float period) {
     auto periodDuration = std::chrono::duration<float, std::milli>(period);
-    auto delayDuration = std::chrono::duration<float, std::milli>(1.0/60.0);
+    auto delayDuration = std::chrono::duration<float, std::milli>(100.0/6.0);
+    
     auto delayStart = std::chrono::steady_clock::now();
 
     std::thread delayThread([delayStart, delayDuration, this]() {
@@ -73,6 +74,7 @@ void Chip8::startCycle(float period) {
     std::cout << "Cycled started" << '\n';
     while(!halt) {
         auto start = std::chrono::steady_clock::now();
+
         //std::cout << std::hex << "PC " << pc << '\n';
         //std::cout << std::hex << "I " << I << '\n';
         //std::cout << std::hex << "SP "<< sp << '\n';
@@ -81,6 +83,7 @@ void Chip8::startCycle(float period) {
         executeNextInstruction();
 
         while ((periodDuration - (std::chrono::steady_clock::now() - start)).count() > 0) {}
+        //std::cout << (std::chrono::steady_clock::now() - start).count() / 1000000.0 << " ms" << std::endl;
     }
 
     std::cout << "Cycled stopped" << '\n';
@@ -460,20 +463,15 @@ void Chip8::op_FX07(uint16_t instruction) {
 void Chip8::op_FX0A(uint16_t instruction) {
     //std::cout << "op_FX0A" << '\n';
     uint16_t x = (instruction & 0x0F00u) >> 8u;
-    if (keypadWait) {
-        // A key is already being awaited, so we need to skip this instruction
-        pc -= 2;
-        return;
-    }
+
     for (int i = 0; i < 16; ++i) {
         if (key[i] != 0) {
             V[x] = i;
-            keypadWait = false;
             return;
         }
     }
-    // No key is currently pressed, so we need to wait for a key press
-    keypadWait = true;
+
+    pc -= 2;
 }
 
 // FX15: Set the delay timer to VX
