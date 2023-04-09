@@ -41,14 +41,18 @@ const uint8_t fontset[FONTSET_SIZE] =
 class Chip8
 {
     public:
-        Chip8();
         unsigned int video[DISPLAY_WIDTH][DISPLAY_HEIGHT] {0};
-        void loadROM(std::string romName);
         bool drawFlag;
         bool halt;
-        void startCycle(float period);
+        bool shiftQuirk, loadStoreQuirk;
         unsigned char key[16] = {0x00};
         uint8_t soundTimer;
+
+        Chip8();
+
+        void loadROM(std::string romName);
+        void startCycle(float period);
+        void setQuirks(bool value);
 
     private:
         uint8_t memory[MEMORY_SIZE] = {0};
@@ -61,6 +65,7 @@ class Chip8
 
         std::stack<uint16_t> stack;
 
+        
         void DecrementDelay(auto delayStart, auto delayDuration);
 
         void executeNextInstruction();

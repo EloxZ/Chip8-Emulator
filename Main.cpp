@@ -14,9 +14,13 @@ int main()
     const float sample_rate = 44100;
     const float frequency = 880; // 880 Hz = A5
     const float duration = 0.1; // 0.1 seconds
+    const float speed = 1;
     const float amplitude = 30000;
     std::vector<sf::Int16> beep;
-    
+    std::vector<sf::Int16> beep2;
+    std::vector<sf::Int16> beep3;
+    std::vector<sf::Int16> beep4;
+
     for (float t = 0; t < duration; t += 1 / sample_rate) {
         float y = 0;
         y += sin(2 * M_PI * frequency * t);
@@ -30,19 +34,78 @@ int main()
         beep.push_back(sample);
     }
 
+    for (float t = 0; t < duration; t += 1 / sample_rate) {
+        float y = 0;
+        y += sin(2 * M_PI * (frequency - 50) * t);
+        y += sin(2 * M_PI * (frequency - 50) * 2 * t) / 2;
+        y += sin(2 * M_PI * (frequency - 50) * 4 * t) / 4;
+        y += sin(2 * M_PI * (frequency - 50) * 8 * t) / 8;
+        y += sin(2 * M_PI * (frequency - 50) * 16 * t) / 16;
+        y /= 2; // normalize the amplitude
+
+        short sample = y * amplitude;
+        beep2.push_back(sample);
+    }
+
+    for (float t = 0; t < duration; t += 1 / sample_rate) {
+        float y = 0;
+        y += sin(2 * M_PI * (frequency + 50) * t);
+        y += sin(2 * M_PI * (frequency + 50) * 2 * t) / 2;
+        y += sin(2 * M_PI * (frequency + 50) * 4 * t) / 4;
+        y += sin(2 * M_PI * (frequency + 50) * 8 * t) / 8;
+        y += sin(2 * M_PI * (frequency + 50) * 16 * t) / 16;
+        y /= 2; // normalize the amplitude
+
+        short sample = y * amplitude;
+        beep3.push_back(sample);
+    }
+
+    for (float t = 0; t < duration; t += 1 / sample_rate) {
+        float y = 0;
+        y += sin(2 * M_PI * (frequency - 80) * t);
+        y += sin(2 * M_PI * (frequency - 80) * 2 * t) / 2;
+        y += sin(2 * M_PI * (frequency - 80) * 4 * t) / 4;
+        y += sin(2 * M_PI * (frequency - 80) * 8 * t) / 8;
+        y += sin(2 * M_PI * (frequency - 80) * 16 * t) / 16;
+        y /= 2; // normalize the amplitude
+
+        short sample = y * amplitude;
+        beep4.push_back(sample);
+    }
+
     sf::RenderWindow window(sf::VideoMode(DISPLAY_WIDTH * videoScale, DISPLAY_HEIGHT * videoScale), "Chip-8 Emulator");
     window.setFramerateLimit(60);
 
     sf::SoundBuffer buffer;
     buffer.loadFromSamples(beep.data(), beep.size(), 1, sample_rate);
+    sf::SoundBuffer buffer2;
+    buffer2.loadFromSamples(beep2.data(), beep2.size(), 1, sample_rate);
+    sf::SoundBuffer buffer3;
+    buffer3.loadFromSamples(beep3.data(), beep3.size(), 1, sample_rate);
+    sf::SoundBuffer buffer4;
+    buffer4.loadFromSamples(beep4.data(), beep4.size(), 1, sample_rate);
 
     sf::Sound sound;
     sound.setBuffer(buffer);
     sound.setVolume(50);
 
+    sf::Sound sound2;
+    sound2.setBuffer(buffer2);
+    sound2.setVolume(50);
+
+    sf::Sound sound3;
+    sound3.setBuffer(buffer3);
+    sound3.setVolume(50);
+
+    sf::Sound sound4;
+    sound4.setBuffer(buffer4);
+    sound4.setVolume(50);
+
+    chip.setQuirks(true);
     chip.loadROM("pong.ch8");
-    std::thread cpuThread([&chip]() {
-        chip.startCycle(1.43);
+    
+    std::thread cpuThread([&chip, speed]() {
+        chip.startCycle(1.43 / speed);
     });
 
     sf::Event event;
@@ -58,7 +121,22 @@ int main()
             }
         } else if (chip.soundTimer > 0) {
             beepClock.restart();
-            sound.play();
+            switch (rand() % 4)
+            {
+                case 1:
+                    sound2.play();
+                    break;
+                case 3:
+                    sound3.play();
+                    break;
+                case 4:
+                    sound4.play();
+                    break;
+                default:
+                    sound.play();
+                    break;
+            }
+            
             isBeeping = true;
             chip.soundTimer = 0;
         }
@@ -75,13 +153,13 @@ int main()
                 window.close();
             } else if (event.type == sf::Event::KeyPressed) {
                 int index = keyCodeIndex(event.key.code);
-                std::cout << "Key pressed " << index << std::endl;
+                //std::cout << "Key pressed " << index << std::endl;
                 if (index != -1) {
                     chip.key[index] = 1;
                 }
             } else if (event.type == sf::Event::KeyReleased) {
                 int index = keyCodeIndex(event.key.code);
-                std::cout << "Key released " << index << std::endl;
+                //std::cout << "Key released " << index << std::endl;
                 if (index != -1) {
                     chip.key[index] = 0;
                 }
@@ -136,7 +214,7 @@ int keyCodeIndex(sf::Keyboard::Key keyCode) {
 }
 
 void drawVideo(sf::RenderWindow& window, Chip8& chip, unsigned int videoScale) {
-    window.clear();
+    window.clear(sf::Color(29,30,44,255));
 
     for (unsigned int x=0; x < DISPLAY_WIDTH; x++)
     {
@@ -146,7 +224,7 @@ void drawVideo(sf::RenderWindow& window, Chip8& chip, unsigned int videoScale) {
             {
                 sf::RectangleShape rectangle;
                 rectangle.setSize(sf::Vector2f(videoScale, videoScale));
-                rectangle.setFillColor(sf::Color::White);
+                rectangle.setFillColor(sf::Color(232,233,235,255));
                 rectangle.setPosition(x * videoScale, y * videoScale);
                 window.draw(rectangle);
             }

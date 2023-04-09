@@ -10,6 +10,8 @@ Chip8::Chip8()
     drawFlag = false;
     delayTimer = 0;
     soundTimer = 0;
+    shiftQuirk = false;
+    loadStoreQuirk = false;
 
     int i = 0;
     while (i < FONTSET_SIZE) {
@@ -48,6 +50,11 @@ void Chip8::loadROM(std::string romName)
         input.close();
     }
    
+}
+
+void Chip8::setQuirks(bool value) {
+    shiftQuirk = value;
+    loadStoreQuirk = value;
 }
 
 void Chip8::DecrementDelay(auto delayStart, auto delayDuration) {
@@ -375,7 +382,7 @@ void Chip8::op_8XY4(uint16_t instruction) {
 void Chip8::op_8XY6(uint16_t instruction) {
     //std::cout << "op_8XY6" << '\n';
     uint8_t X = (instruction >> 8) & 0x0F;
-    uint8_t Y = (instruction >> 4) & 0x0F;
+    uint8_t Y = (shiftQuirk)? X : ((instruction >> 4) & 0x0F);
     uint8_t t = V[Y] & 0x1;
     V[X] = V[Y] >> 1;
     V[0xF] = t;
@@ -392,7 +399,7 @@ void Chip8::op_8XY7(uint16_t instruction) {
 void Chip8::op_8XYE(uint16_t instruction) {
     //std::cout << "op_8X0E" << '\n';
     uint8_t X = (instruction >> 8) & 0x0F;
-    uint8_t Y = (instruction >> 4) & 0x0F;
+    uint8_t Y = (shiftQuirk)? X : ((instruction >> 4) & 0x0F);
     uint8_t t = V[Y] >> 7;
     V[X] = V[Y] << 1;
     V[0xF] = t;
@@ -518,7 +525,7 @@ void Chip8::op_FX55(uint16_t instruction) {
     for (int i = 0; i <= x; ++i) {
         memory[I + i] = V[i];
     }
-    I += x + 1;
+    if (!loadStoreQuirk) I += x + 1;
 }
 
 // FX65: Fill V0 to VX (inclusive) with values from memory starting at address I
@@ -528,7 +535,7 @@ void Chip8::op_FX65(uint16_t instruction) {
     for (int i = 0; i <= x; ++i) {
         V[i] = memory[I + i];
     }
-    I += x + 1;
+    if (!loadStoreQuirk) I += x + 1;
 }
 
 void Chip8::op_6XNN(uint16_t instruction) {
