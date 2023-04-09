@@ -1,0 +1,14 @@
+{
+    "name": "C++ Launch",
+    "type": "cppdbg",
+    "request": "launch",
+    "logging": { "engineLogging": true },
+    "program": "${workspaceFolder}/a.out",
+    "args": ["arg1", "arg2"],
+    "environment": [{ "name": "config", "value": "Debug" },
+    {
+      "name": "LD_LIBRARY_PATH",
+      "value": "C:\\SFML-2.5.1\\lib"
+  }],
+    "cwd": "${workspaceFolder}"
+  }

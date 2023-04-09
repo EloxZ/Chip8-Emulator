@@ -1,0 +1,31 @@
+{
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "C/C++: gcc.exe compilar archivo activo",
+            "command": "C:\\msys64\\mingw64\\bin\\g++.exe",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-g",
+                "${file}","${fileDirname}/Chip8.cpp",
+                "-I\"C:\\SFML-2.5.1\\include\"",
+                "-o",
+                "${fileDirname}\\${fileBasenameNoExtension}.exe",
+                "-L\"C:\\SFML-2.5.1\\lib\" -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio"
+                
+            ],
+            "options": {
+                "cwd": "C:\\msys64\\mingw64\\bin"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Tarea generada por el depurador."
+        }
+    ],
+    "version": "2.0.0"
+}
