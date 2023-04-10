@@ -14,7 +14,7 @@ int main()
     const float sample_rate = 44100;
     const float frequency = 880; // 880 Hz = A5
     const float duration = 0.1; // 0.1 seconds
-    const float speed = 1;
+    const float speed = 24;
     const float amplitude = 30000;
     std::vector<sf::Int16> beep;
     std::vector<sf::Int16> beep2;
@@ -101,8 +101,8 @@ int main()
     sound4.setBuffer(buffer4);
     sound4.setVolume(50);
 
-    chip.setQuirks(true);
-    chip.loadROM("pong.ch8");
+    chip.setQuirks(false);
+    chip.loadROM("golf.ch8");
     
     std::thread cpuThread([&chip, speed]() {
         chip.startCycle(1.43 / speed);
@@ -126,10 +126,10 @@ int main()
                 case 1:
                     sound2.play();
                     break;
-                case 3:
+                case 2:
                     sound3.play();
                     break;
-                case 4:
+                case 3:
                     sound4.play();
                     break;
                 default:
